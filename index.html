@@ -80,6 +80,7 @@
     <script>
         let entryCount = 0;
         let punchInTime = null;
+        const defaultTimeZone = 'America/Vancouver';
 
         const timeZones = Intl.supportedValuesOf('timeZone');
 
@@ -113,7 +114,7 @@
             localStorage.setItem('wage', document.getElementById('wage').value);
         }
 
-        function createEntryDiv(id, startValue = '', endValue = '', timeZoneValue = Intl.DateTimeFormat().resolvedOptions().timeZone) {
+        function createEntryDiv(id, startValue = '', endValue = '', timeZoneValue = defaultTimeZone) {
             const entryDiv = document.createElement('div');
             entryDiv.className = 'entry';
             entryDiv.id = `entry${id}`;
@@ -164,7 +165,7 @@
         }
 
         function punchIn() {
-            punchInTime = new Date();
+            punchInTime = new Date().toLocaleString('sv-SE', { timeZone: defaultTimeZone, hour12: false }).replace(' ', 'T');
             alert(`Punched in at ${punchInTime}`);
         }
 
@@ -173,10 +174,9 @@
                 alert('You need to punch in first!');
                 return;
             }
-            const punchOutTime = new Date();
-            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const punchOutTime = new Date().toLocaleString('sv-SE', { timeZone: defaultTimeZone, hour12: false }).replace(' ', 'T');
             entryCount++;
-            const entryDiv = createEntryDiv(entryCount, punchInTime.toISOString().slice(0, 16), punchOutTime.toISOString().slice(0, 16), timeZone);
+            const entryDiv = createEntryDiv(entryCount, punchInTime, punchOutTime, defaultTimeZone);
             document.getElementById('entries').appendChild(entryDiv);
             toggleEntry(entryCount); // Automatically collapse the newly added entry
             punchInTime = null;
