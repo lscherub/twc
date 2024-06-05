@@ -99,11 +99,14 @@
         function saveEntries() {
             const entries = [];
             for (let i = 1; i <= entryCount; i++) {
-                const start = document.getElementById(`start${i}`).value;
-                const end = document.getElementById(`end${i}`).value;
-                const timeZone = document.getElementById(`timeZone${i}`).value;
-                if (start && end) {
-                    entries.push({ start, end, timeZone });
+                const entryDiv = document.getElementById(`entry${i}`);
+                if (entryDiv) {
+                    const start = document.getElementById(`start${i}`).value;
+                    const end = document.getElementById(`end${i}`).value;
+                    const timeZone = document.getElementById(`timeZone${i}`).value;
+                    if (start && end) {
+                        entries.push({ start, end, timeZone });
+                    }
                 }
             }
             localStorage.setItem('entries', JSON.stringify(entries));
