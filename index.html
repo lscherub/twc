@@ -26,7 +26,7 @@
             max-height: 80vh;
             overflow-y: auto;
         }
-        input, button {
+        input, button, select {
             margin: 10px 0;
             padding: 10px;
             width: 100%;
@@ -51,7 +51,7 @@
             border: 1px solid #ddd;
             border-radius: 5px;
         }
-        .entry-content label, .entry-content input {
+        .entry-content label, .entry-content input, .entry-content select {
             margin: 5px 0;
         }
         .entry-content button {
@@ -81,11 +81,13 @@
         let entryCount = 0;
         let punchInTime = null;
 
+        const timeZones = Intl.supportedValuesOf('timeZone');
+
         function loadEntries() {
             const entries = JSON.parse(localStorage.getItem('entries')) || [];
             entryCount = entries.length;
             entries.forEach((entry, index) => {
-                const entryDiv = createEntryDiv(index + 1, entry.start, entry.end);
+                const entryDiv = createEntryDiv(index + 1, entry.start, entry.end, entry.timeZone);
                 document.getElementById('entries').appendChild(entryDiv);
             });
             const wage = localStorage.getItem('wage');
@@ -99,15 +101,16 @@
             for (let i = 1; i <= entryCount; i++) {
                 const start = document.getElementById(`start${i}`).value;
                 const end = document.getElementById(`end${i}`).value;
+                const timeZone = document.getElementById(`timeZone${i}`).value;
                 if (start && end) {
-                    entries.push({ start, end });
+                    entries.push({ start, end, timeZone });
                 }
             }
             localStorage.setItem('entries', JSON.stringify(entries));
             localStorage.setItem('wage', document.getElementById('wage').value);
         }
 
-        function createEntryDiv(id, startValue = '', endValue = '') {
+        function createEntryDiv(id, startValue = '', endValue = '', timeZoneValue = Intl.DateTimeFormat().resolvedOptions().timeZone) {
             const entryDiv = document.createElement('div');
             entryDiv.className = 'entry';
             entryDiv.id = `entry${id}`;
@@ -121,6 +124,10 @@
                     <input type="datetime-local" id="start${id}" value="${startValue}" />
                     <label for="end${id}">End Date and Time:</label>
                     <input type="datetime-local" id="end${id}" value="${endValue}" />
+                    <label for="timeZone${id}">Time Zone:</label>
+                    <select id="timeZone${id}">
+                        ${timeZones.map(tz => `<option value="${tz}" ${tz === timeZoneValue ? 'selected' : ''}>${tz}</option>`).join('')}
+                    </select>
                     <button onclick="removeEntry(${id})">Remove</button>
                 </div>
             `;
@@ -164,8 +171,9 @@
                 return;
             }
             const punchOutTime = new Date();
+            const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
             entryCount++;
-            const entryDiv = createEntryDiv(entryCount, punchInTime.toISOString().slice(0, 16), punchOutTime.toISOString().slice(0, 16));
+            const entryDiv = createEntryDiv(entryCount, punchInTime.toISOString().slice(0, 16), punchOutTime.toISOString().slice(0, 16), timeZone);
             document.getElementById('entries').appendChild(entryDiv);
             toggleEntry(entryCount); // Automatically collapse the newly added entry
             punchInTime = null;
