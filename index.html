@@ -21,6 +21,13 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+        .time-entry {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 10px;
         }
         input, button {
             margin: 10px 0;
@@ -28,34 +35,57 @@
             width: 100%;
             box-sizing: border-box;
         }
+        button {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Time Wage Calculator</h1>
-        <label for="start">Start Date and Time:</label>
-        <input type="datetime-local" id="start" />
-        <label for="end">End Date and Time:</label>
-        <input type="datetime-local" id="end" />
+        <div id="time-entries"></div>
+        <button onclick="addTimeEntry()">Add Time Entry</button>
         <label for="wage">Hourly Wage:</label>
         <input type="number" id="wage" placeholder="Enter hourly wage" />
         <button onclick="calculateWage()">Calculate</button>
         <h2 id="result"></h2>
     </div>
     <script>
-        function calculateWage() {
-            const start = new Date(document.getElementById('start').value);
-            const end = new Date(document.getElementById('end').value);
-            const wage = document.getElementById('wage').value;
+        function addTimeEntry() {
+            const container = document.createElement('div');
+            container.className = 'time-entry';
+            container.innerHTML = `
+                <label for="start">Start Date and Time:</label>
+                <input type="datetime-local" class="start" />
+                <label for="end">End Date and Time:</label>
+                <input type="datetime-local" class="end" />
+                <button onclick="removeTimeEntry(this)">Remove</button>
+            `;
+            document.getElementById('time-entries').appendChild(container);
+        }
 
-            if (start >= end) {
-                alert("End date and time must be after start date and time.");
-                return;
+        function removeTimeEntry(button) {
+            button.parentNode.remove();
+        }
+
+        function calculateWage() {
+            const timeEntries = document.getElementsByClassName('time-entry');
+            const wage = document.getElementById('wage').value;
+            let totalHours = 0;
+
+            for (let entry of timeEntries) {
+                const start = new Date(entry.getElementsByClassName('start')[0].value);
+                const end = new Date(entry.getElementsByClassName('end')[0].value);
+
+                if (start >= end) {
+                    alert("End date and time must be after start date and time.");
+                    return;
+                }
+
+                totalHours += (end - start) / (1000 * 60 * 60); // Convert milliseconds to hours
             }
 
-            const totalHours = (end - start) / (1000 * 60 * 60); // Convert milliseconds to hours
             const totalWage = totalHours * wage;
-
             document.getElementById('result').innerText = `Total Hours Worked: ${totalHours.toFixed(2)}\nTotal Wage: $${totalWage.toFixed(2)}`;
         }
     </script>
