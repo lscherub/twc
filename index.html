@@ -21,13 +21,6 @@
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 90%;
-            max-width: 600px;
-        }
-        .time-entry {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 10px;
         }
         input, button {
             margin: 10px 0;
@@ -35,54 +28,55 @@
             width: 100%;
             box-sizing: border-box;
         }
-        button {
-            cursor: pointer;
+        .entry {
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Time Wage Calculator</h1>
-        <div id="time-entries"></div>
-        <button onclick="addTimeEntry()">Add Time Entry</button>
+        <div id="entries"></div>
+        <button onclick="addEntry()">Add Entry</button>
         <label for="wage">Hourly Wage:</label>
         <input type="number" id="wage" placeholder="Enter hourly wage" />
         <button onclick="calculateWage()">Calculate</button>
         <h2 id="result"></h2>
     </div>
     <script>
-        function addTimeEntry() {
-            const container = document.createElement('div');
-            container.className = 'time-entry';
-            container.innerHTML = `
-                <label for="start">Start Date and Time:</label>
-                <input type="datetime-local" class="start" />
-                <label for="end">End Date and Time:</label>
-                <input type="datetime-local" class="end" />
-                <button onclick="removeTimeEntry(this)">Remove</button>
+        let entryCount = 0;
+
+        function addEntry() {
+            entryCount++;
+            const entryDiv = document.createElement('div');
+            entryDiv.className = 'entry';
+            entryDiv.id = `entry${entryCount}`;
+            entryDiv.innerHTML = `
+                <label for="start${entryCount}">Start Date and Time:</label>
+                <input type="datetime-local" id="start${entryCount}" />
+                <label for="end${entryCount}">End Date and Time:</label>
+                <input type="datetime-local" id="end${entryCount}" />
+                <button onclick="removeEntry(${entryCount})">Remove</button>
             `;
-            document.getElementById('time-entries').appendChild(container);
+            document.getElementById('entries').appendChild(entryDiv);
         }
 
-        function removeTimeEntry(button) {
-            button.parentNode.remove();
+        function removeEntry(id) {
+            const entryDiv = document.getElementById(`entry${id}`);
+            entryDiv.parentNode.removeChild(entryDiv);
         }
 
         function calculateWage() {
-            const timeEntries = document.getElementsByClassName('time-entry');
-            const wage = document.getElementById('wage').value;
             let totalHours = 0;
+            const wage = parseFloat(document.getElementById('wage').value);
 
-            for (let entry of timeEntries) {
-                const start = new Date(entry.getElementsByClassName('start')[0].value);
-                const end = new Date(entry.getElementsByClassName('end')[0].value);
+            for (let i = 1; i <= entryCount; i++) {
+                const start = new Date(document.getElementById(`start${i}`).value);
+                const end = new Date(document.getElementById(`end${i}`).value);
 
-                if (start >= end) {
-                    alert("End date and time must be after start date and time.");
-                    return;
+                if (start && end && start < end) {
+                    totalHours += (end - start) / (1000 * 60 * 60); // Convert milliseconds to hours
                 }
-
-                totalHours += (end - start) / (1000 * 60 * 60); // Convert milliseconds to hours
             }
 
             const totalWage = totalHours * wage;
